@@ -4,6 +4,6 @@
 3. `getIntVolatile(Object, long)`、`putIntVolatile(Object, long, int)` ... 根据偏移量获取/设置字段，具有 volatile 语义；
 4. `park()`、`unpark()` 阻塞、唤醒线程；
 5. `monitorEnter(Object)`、`monitorExit(Object)` 监视器相关操作；
-6. `compareAndSwapInt(Object, long, int , int)` CAS相关操作；
+6. `compareAndSwapInt(Object, long, int , int)` CAS 相关操作；
 7. `loadFence()`、`storeFence()`、`fullFence()` 内存屏障相关操作；
 8. `allocateMemory(long)`、`reallocateMemory(long, long)`、`freeMemory(long)` 内存相关操作；
