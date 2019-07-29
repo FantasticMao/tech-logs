@@ -37,11 +37,13 @@ Spring IoC 的基本实现是在 `org.springframework.beans` 和 `org.springfram
 ## Bean 概览
 Spring IoC 容器根据开发者提供给的配置元数据创建 Bean，例如 XML 文件中的 `<bean/>`、Java 代码中的 `@Bean`。
 
-对于容器来说，这些 Bean 的定义是以 `BeanDefinition` 对象表示的。`BeanDefinition` 接口包含了一下元数据：
+对于容器来说，这些 Bean 的定义是以 `BeanDefinition` 对象表示的。`BeanDefinition` 接口包含了以下元数据：
 * 全限定类名
 * Bean 行为配置元素（scope、lazy initialization、lifecycle callbacks 等等）
 * 依赖的其它 Bean
 * 其它的初始化设置（线程池大小、连接池大小等等）
+
+`ApplicationContext` 的具体实现类 `DefaultListableBeanFactory` 允许开发者将在外部创建的对象注册到 IoC 容器中。这是通过 `DefaultListableBeanFactory#registerSingleton(String, Object)` 和 `DefaultListableBeanFactory#registerBeanDefinition(String, BeanDefinition)` 两个 API 实现的。
 
 ---
 
@@ -49,11 +51,24 @@ Spring IoC 容器根据开发者提供给的配置元数据创建 Bean，例如 
 关于使用依赖注入的好处，Spring 官方文档是这样描述的：
 > Code is cleaner with the DI principle, and decoupling is more effective when objects are provided with their dependencies. The object does not look up its dependencies and does not know the location or class of the dependencies. As a result, your classes become easier to test, particularly when the dependencies are on interfaces or abstract base classes, which allow for stub or mock implementations to be used in unit tests.
 
-依赖注入主要有两种方式：基于构造方法的注入和基于 setter 方法的注入。
+简单翻译和总结一下，使用依赖注入有利于：
+1. 代码简洁
+2. 对象之间的解耦
+3. 单元测试（特别是在面向接口编程当中）
+
+依赖注入主要有两种方式：基于构造方法的注入、基于静态工厂方法的注入、基于 setter 方法的注入，这其中需要注意以下几点：
+1. 基于构造方法注入时，指定构造方法参数是从下标 0 开始的
+2. 基于 setter 方法注入时，IoC 容器会默认调用无参的构造方法或静态工厂方法
 
 依赖注入的具体使用方式：略。
 
-[如何解决环形的依赖关系](https://docs.spring.io/spring/docs/5.1.8.RELEASE/spring-framework-reference/core.html#beans-dependency-resolution)
+Spring IoC 容器会在启动时候校验每一个 Bean 的配置元数据，此时（IoC 容器启动的时候）作用域是 `singleton` 的和设置过 `lazy-init` 属性的 Bean 会在被创建，除此之外的其它 Bean 都不会在它们被实际需要之前被创建。
+
+如果两个互相嵌套使用的 Bean 都使用基于构造方法的注入方式的话，可能会导致 [环形的依赖关系](https://docs.spring.io/spring/docs/5.1.8.RELEASE/spring-framework-reference/core.html#beans-dependency-resolution) 的问题。在这种情况下，Spring 建议将相关类的源码改成基于 setter 方法的注入方式。
+
+在定义 Bean 的时候，可以使用 `depends-on` 属性表示两个 Bean 之间的间接依赖关系。
+
+默认情况下，Spring 会在 IoC 容器启动过程中创建和配置 `singleton` 作用域的 Bean，开发者可以使用 `lazy-init` 属性改变这种默认行为。
 
 ---
 
