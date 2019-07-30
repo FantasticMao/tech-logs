@@ -3,7 +3,7 @@
 ## IoC 容器简介，Bean 简介
 Inversion of Control（控制反转）等同于 Dependency Injection（依赖注入），两者只是描述角度的不同。
 
-对象的的依赖，是指一个对象正常工作时所需要其它对象。
+对象的依赖，是指一个对象正常工作时所需要其它对象。
 
 定义对象之间的依赖关系，是指通过构造方法的参数、工厂方法的参数，或者是使用构造方法/工厂方法创建对象之后再使用 setter 方法设置对象属性的过程。
 
@@ -11,7 +11,7 @@ IoC 将定义对象之间的依赖关系的控制权，从开发者手中转移�
 
 Spring IoC 的基本实现是在 `org.springframework.beans` 和 `org.springframework.context` 两个包中。
 
-`BeanFactory` 接口定义了一种管理对象的机制，如下图所示：
+`BeanFactory` 接口定义了一种管理对象的机制。
 
 ![image](BeanFactory.png)
 
@@ -47,7 +47,7 @@ Spring IoC 容器根据开发者提供给的配置元数据创建 Bean，例如 
 
 ---
 
-## Dependencies
+## 依赖相关
 关于使用依赖注入的好处，Spring 官方文档是这样描述的：
 > Code is cleaner with the DI principle, and decoupling is more effective when objects are provided with their dependencies. The object does not look up its dependencies and does not know the location or class of the dependencies. As a result, your classes become easier to test, particularly when the dependencies are on interfaces or abstract base classes, which allow for stub or mock implementations to be used in unit tests.
 
@@ -56,13 +56,13 @@ Spring IoC 容器根据开发者提供给的配置元数据创建 Bean，例如 
 2. 对象之间的解耦
 3. 单元测试（特别是在面向接口编程当中）
 
-依赖注入主要有两种方式：基于构造方法的注入、基于静态工厂方法的注入、基于 setter 方法的注入，这其中需要注意以下几点：
+依赖注入主要有几种方式：基于构造方法的注入、基于静态工厂方法的注入、基于 setter 方法的注入，这其中需要注意以下几点：
 1. 基于构造方法注入时，指定构造方法参数是从下标 0 开始的
 2. 基于 setter 方法注入时，IoC 容器会默认调用无参的构造方法或静态工厂方法
 
 依赖注入的具体使用方式：略。
 
-Spring IoC 容器会在启动时候校验每一个 Bean 的配置元数据，此时（IoC 容器启动的时候）作用域是 `singleton` 的和设置过 `lazy-init` 属性的 Bean 会在被创建，除此之外的其它 Bean 都不会在它们被实际需要之前被创建。
+Spring IoC 容器会在启动时候校验每一个 Bean 的配置元数据，此时（IoC 容器启动的时候）作用域是 `singleton` 的和设置过 `lazy-init` 属性的 Bean 会被创建，除此之外的其它 Bean 都不会在它们被实际需要之前被创建。
 
 如果两个互相嵌套使用的 Bean 都使用基于构造方法的注入方式的话，可能会导致 [环形的依赖关系](https://docs.spring.io/spring/docs/5.1.8.RELEASE/spring-framework-reference/core.html#beans-dependency-resolution) 的问题。在这种情况下，Spring 建议将相关类的源码改成基于 setter 方法的注入方式。
 
@@ -72,14 +72,35 @@ Spring IoC 容器会在启动时候校验每一个 Bean 的配置元数据，此
 
 ---
 
+## 自动装配
+Spring IoC 容器可以自动装配 Bean 之间的依赖关系，自动装配的几种模式如下：
+
+模式 | 说明
+--- | ---
+no（默认值） | 不使用自动装配，需要开发者显示指定 Bean 之间的依赖关系
+byName | 通过字段名称。通过调用相关字段的 `setXxx()` 设值
+byType | 通过字段类型。如果容器中有多个该类型的 Bean，则会抛出异常；如果容器中没有该类型的 Bean，则不会设值
+constructor | 在构造方法中，通过参数类型。如果容器中没有该类型的 Bean，则会抛出异常
+
+关于自动装配的局限和不足，Spring 官方文档是这样描述的：[Limitations and Disadvantages of Autowiring](https://docs.spring.io/spring/docs/5.1.8.RELEASE/spring-framework-reference/core.html#beans-autowired-exceptions)
+
+---
+
 ## Bean 作用域
-Spring 支持的 Bean 的作用域有：
-* singleton（默认值）对于每一个 IoC 容器来说是单例的
-* prototype 会创建多个实例
-* request 依赖于 HTTP Request 的生命周期
-* session 依赖于 HTTP Session 的生命周期
-* application 依赖于 ServletContext 的生命周期
-* websocket 依赖于 WebSocket 的生命周期
+在 Spring IoC 容器中，开发者还可以控制从特定 `BeanDefinition` 中创建的对象的作用域，这样就可以避免在 Java 代码层面再编写例如单例模式的控制对象作用域的逻辑了。
+
+Spring 支持 Bean 的几种作用域如下：
+
+作用域 | 说明
+--- | ---
+singleton（默认值） | 对于每一个 IoC 容器来说是单例的
+prototype | 会创建多个实例
+request | 依赖于 HTTP Request 的生命周期
+session | 依赖于 HTTP Session 的生命周期
+application | 依赖于 ServletContext 的生命周期
+websocket | 依赖于 WebSocket 的生命周期
+
+Spring IoC 容器中的单例模式和 Gang of Four (GoF) 中的单例模式略有不同。后者通过硬编码的方式编写单例模式，每一个特定类的实例对于每一个类加载器来说是单例；前者是对于每一个 Spring IoC 容器来说是单例。
 
 ---
 
@@ -99,14 +120,14 @@ JSR-250 规范中的 `@PostConstruct` 和 `@PreDestroy` 也可以实现上述效
 
 ## 容器扩展点
 
-### 通过使用 `BeanPostProcessor` 接口自定义 Bean
-例如使用 `ApplicationContextAwareProcessor` 实现 *Aware 的一系列接口。
+### `BeanPostProcessor`
+开发者可以通过 `BeanPostProcessor` 接口来实现自定义 Bean 的实例化逻辑、依赖解析逻辑等等，例如 Spring 内部的使用 `ApplicationContextAwareProcessor` 实现 *Aware 的一系列接口。
 
-### 通过使用 `BeanFactoryPostProcessor` 接口自定义配置元数据
-例如实现 `BeanDefinitionRegistryPostProcessor` 接口可以修改预先定义的 `BeanDefinition`。
+### `BeanFactoryPostProcessor`
+开发者可以通过 `BeanFactoryPostProcessor` 接口来实现操作和修改 Bean 的配置元数据，例如可以通过实现 `BeanDefinitionRegistryPostProcessor` 接口来修改预先定义的 `BeanDefinition`。
 
-### 通过使用 `FactoryBean` 接口自定义 Bean 的实例化逻辑
-例如使用 `ProxyFactoryBean` 生成 AOP 代理类。
+### `FactoryBean`
+开发者可以通过 `FactoryBean` 接口创建 Bean 的工厂对象，从而实现复杂对象的实例化逻辑，例如 Spring 内部使用 `ProxyFactoryBean` 生成 Bean 的 AOP 代理类。
 
 ---
 
