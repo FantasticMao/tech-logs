@@ -386,3 +386,199 @@ protected DefaultListableBeanFactory createBeanFactory() {
 ---
 
 ## 从 IoC 容器中获取 Bean
+
+**从 IoC 容器中获取 Bean**
+```java
+User user = applicationContext.getBean("user", User.class);
+```
+
+```java
+// AbstractApplicationContext
+@Override
+public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+    assertBeanFactoryActive();
+    // 获取 BeanFactory，从 IoC 容器中获取 Bean
+    return getBeanFactory().getBean(name, requiredType);
+}
+```
+
+```java
+// AbstractBeanFactory
+@Override
+public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+    return doGetBean(name, requiredType, null, false);
+}
+
+@SuppressWarnings("unchecked")
+protected <T> T doGetBean(
+        final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
+        throws BeansException {
+    // 转换 Bean 名称（FactoryBean 类型的 Bean 名称，前缀会有 & 符号）
+    final String beanName = transformedBeanName(name);
+    Object bean;
+
+    // 尝试从 singleton Bean 的缓存中获取 Bean
+    Object sharedInstance = getSingleton(beanName);
+    if (sharedInstance != null && args == null) {
+        if (logger.isDebugEnabled()) {
+            if (isSingletonCurrentlyInCreation(beanName)) {
+                logger.debug("Returning eagerly cached instance of singleton bean '" + beanName +
+                        "' that is not fully initialized yet - a consequence of a circular reference");
+            } else {
+                logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
+            }
+        }
+        // 获取 Bean 实例，兼容从 FactoryBean 生成 Bean 的方式
+        bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+    } else {
+        // 当发生环形的依赖关系时，抛出异常
+        if (isPrototypeCurrentlyInCreation(beanName)) {
+            throw new BeanCurrentlyInCreationException(beanName);
+        }
+
+        // 当前 BeanFactory 查找不到相关名称的 Bean，则委托给父级 BeanFactory 查找
+        BeanFactory parentBeanFactory = getParentBeanFactory();
+        if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+            String nameToLookup = originalBeanName(name);
+            if (args != null) {
+                return (T) parentBeanFactory.getBean(nameToLookup, args);
+            } else {
+                return parentBeanFactory.getBean(nameToLookup, requiredType);
+            }
+        }
+
+        if (!typeCheckOnly) {
+            markBeanAsCreated(beanName);
+        }
+
+        try {
+            final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+            checkMergedBeanDefinition(mbd, beanName, args
+
+            // 预先初始化当前 Bean 依赖的其它 Bean
+            String[] dependsOn = mbd.getDependsOn();
+            if (dependsOn != null) {
+                for (String dep : dependsOn) {
+                    if (isDependent(beanName, dep)) {
+                        throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+                                "Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
+                    }
+                    registerDependentBean(dep, beanName);
+                    try {
+                        getBean(dep);
+                    } catch (NoSuchBeanDefinitionException ex) {
+                        throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+                                "'" + beanName + "' depends on missing bean '" + dep + "'", ex);
+                    }
+                }
+            }
+
+            // 创建 Bean 实例
+            if (mbd.isSingleton()) {
+                // 获取 singleton 作用域的 Bean
+                sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {
+                    @Override
+                    public Object getObject() throws BeansException {
+                        try {
+                            return createBean(beanName, mbd, args);
+                        } catch (BeansException ex) {
+                            destroySingleton(beanName);
+                            throw ex;
+                        }
+                    }
+                });
+                // 获取 Bean 实例，兼容从 FactoryBean 生成 Bean 的方式
+                bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
+            } else if (mbd.isPrototype()) {
+                // 获取 prototype 作用域的 Bean
+                Object prototypeInstance = null;
+                try {
+                    beforePrototypeCreation(beanName);
+                    prototypeInstance = createBean(beanName, mbd, args);
+                } finally {
+                    afterPrototypeCreation(beanName);
+                }
+                // 获取 Bean 实例，兼容从 FactoryBean 生成 Bean 的方式
+                bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
+            } else {
+                // 获取其它作用域的 Bean
+                String scopeName = mbd.getScope();
+                final Scope scope = this.scopes.get(scopeName);
+                if (scope == null) {
+                    throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
+                }
+                try {
+                    Object scopedInstance = scope.get(beanName, new ObjectFactory<Object>() {
+                        @Override
+                        public Object getObject() throws BeansException {
+                            beforePrototypeCreation(beanName);
+                            try {
+                                return createBean(beanName, mbd, args);
+                            } finally {
+                                afterPrototypeCreation(beanName);
+                            }
+                        }
+                    });
+                    bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
+                } catch (IllegalStateException ex) {
+                    throw new BeanCreationException(beanName,
+                            "Scope '" + scopeName + "' is not active for the current thread; consider " +
+                            "defining a scoped proxy for this bean if you intend to refer to from a singleton", ex);
+                }
+            }
+        } catch (BeansException ex) {
+            cleanupAfterBeanCreationFailure(beanName);
+            throw ex;
+        }
+    }
+
+    // 校验获取 Bean 的类型
+    if (requiredType != null && bean != null && !requiredType.isInstance(bean)) {
+        try {
+            return getTypeConverter().convertIfNecessary(bean, requiredType);
+        } catch (TypeMismatchException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to convert bean '" + name + "' to required type '" +
+                ClassUtils.getQualifiedName(requiredType) + "'", ex);
+            }
+            throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+        }
+    }
+    return (T) bean;
+}
+
+// 转换 Bean 名称（FactoryBean 类型的 Bean 名称，前缀会有 & 符号）
+protected String transformedBeanName(String name) {
+    return canonicalName(BeanFactoryUtils.transformedBeanName(name));
+}
+
+// 获取 Bean 实例，兼容从 FactoryBean 生成 Bean 的方式
+protected Object getObjectForBeanInstance(
+        Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
+    // 如果 Bean 名称的前缀是 & 符号，但 Bean 却不是 FactoryBean 类型，则会抛出异常
+    if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
+        throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
+    }
+
+    // 如果 Bean 不是 FactoryBean 类型，则返回 Bean 实例
+    if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
+        return beanInstance;
+    }
+
+    Object object = null;
+    if (mbd == null) {
+        // 尝试从 FactoryBean 的缓存中获取 Bean
+        object = getCachedObjectForFactoryBean(beanName);
+    }
+    // 如果 Bean 是 FactoryBean 类型，依据 FactoryBean#getObject() 获取 Bean
+    if (object == null) {
+        FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
+        if (mbd == null && containsBeanDefinition(beanName)) {
+            mbd = getMergedLocalBeanDefinition(beanName);
+        }
+        boolean synthetic = (mbd != null && mbd.isSynthetic());
+        object = getObjectFromFactoryBean(factory, beanName, !synthetic);
+    }
+    return object;
+}
+```
