@@ -11,4 +11,6 @@
 
 Redlock 的大致思路是假设存在 2n+1 台 Redis 实例，当应用获取锁时，需在限定的超时时间内向这些 Redis 实例批量地设置相同的 key 和 value，如果某台 Redis 实例在超时时间内没有设值成功，则应该尽快跳过这台实例。最终，如果在 >n 台实例上设值成功，则表示获取锁成功，否则表示获取锁失败，并且需要删除所有 Redis 实例上的 key。当应用释放锁时，只是简单地向所有 Redis 实例发送释放锁的命令。
 
-原文链接：https://redis.io/topics/distlock ，示例代码如 [图一](1.jpg)。
+原文链接：https://redis.io/topics/distlock ，示例代码如下
+
+![image](1.jpg)

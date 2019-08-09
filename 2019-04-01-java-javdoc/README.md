@@ -7,7 +7,15 @@ javadoc 的基本使用方式：
 * options: 指定 javadoc 运行的命令行选项，具体请见 https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javadoc.html#CHDFDACB ；
 * @argfiles 指定一个文件，文件内容包含了 javadoc 运行的命令行参数；
 
-javadoc 简单的使用方式如 [图一](1.png)，生成的 API 文档如 [图二](2.png)。更多 javadoc 的使用例子请见官方文档 https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javadoc.html#CHDJBGFC 。
+javadoc 简单的使用方式如下
+
+![image](1.png)
+
+生成的 API 文档如
+
+![image](2.png)
+
+更多 javadoc 的使用例子请见官方文档 https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javadoc.html#CHDJBGFC 。
 
 javadoc 的使用方式有以下几点需要注意：
 1. 默认情况下，javadoc 生成的文档只针对 public、protected 修饰的类、内部类（非内部嵌套类）、接口、构造方法、普通方法、字段；
