@@ -77,6 +77,10 @@ export default {
 
 在 Vue 中可以使用 `$root` 属性访问根实例，使用 `$parent` 从子组件访问父组件，配合使用 `ref` 属性和 `$refs` 属性从父组件访问子组件。更多访问元素和组件的内容请见 [官方文档](https://vuejs.bootcss.com/v2/guide/components-edge-cases.html#访问元素-amp-组件)。
 
+### MVVM 实现原理
+
+// TODO
+
 ## [Vue Devtools](https://github.com/vuejs/vue-devtools)
 
 ### 查看 Vue 组件
@@ -103,16 +107,43 @@ Vue Router 的 history 模式使用 `history.pushState` API 实现和 hash 模�
 
 ## [Vue CLI](https://cli.vuejs.org/zh/)
 
-### 配置 webpack output
+### [vue-cli-service](https://cli.vuejs.org/zh/guide/cli-service.html#使用命令)
 
-Vue CLI 可以使用 [`outputDir`](https://cli.vuejs.org/zh/config/#outputdir) 配置项目的构建目录
+Vue CLI 的 `@vue/cli-service` 安装了一个名为 `vue-cli-service` 的命令。
 
-```javascript
-module.exports = {
-  outputDir: "../resources/public/"
-};
-```
+- `vue-cli-service serve` 命令会启动一个开发服务器（基于 [webpack-dev-server](https://github.com/webpack/webpack-dev-server)），并附带开箱即用的模块热重载。可以通过 `vue-cli-service serve [options]` 选项或者 `vue.config.js` 配置文件的 [`devServer`](https://cli.vuejs.org/zh/config/#devserver) 属性配置开发服务器。通过配置文件的示例如下：
 
-### 配置环境变量
+  ```javascript
+  module.exports = {
+    devServer: {
+      open: true,
+      host: "0.0.0.0",
+      port: 9090,
+      https: false
+    }
+  };
+  ```
 
-Vue CLI 可以使用 `.env` 和 `.env.[mode]` 文件定义不同环境下的变量。需要注意的是，只有 `VUE_APP_` 开头的变量会被 `webpack.DefinePlugin` 静态嵌入到 Vue 客户端侧的包中。并且，Vue CLI 定义了两个全局的变量：`NODE_ENV` 和 `BASE_URL`。更多详细内容请见 [官方文档](https://cli.vuejs.org/zh/guide/mode-and-env.html#模式)。
+- `vue-cli-service build` 命令默认会在 `dist/` 目录产生一个可用于生产环境的包，带有 JS/CSS/HTML 的压缩，和为更好地缓存而做的自动的 vendor chunk splitting。
+
+- `vue-cli-service inspect` 命令可以审查当前 Vue 项目的 webpack 配置。
+
+### [配置 webpack](https://cli.vuejs.org/zh/guide/webpack.html)
+
+在 Vue CLI 中可以使用 `vue.config.js` 的 `configureWebpack` 属性配置 webpack。
+
+### [模式](https://cli.vuejs.org/zh/guide/mode-and-env.html#模式)
+
+在 Vue CLI 中默认有以下三种模式：
+
+- `development` 被用于 `vue-cli-service serve`
+- `production` 被用于 `vue-cli-service build` 和 `vue-cli-service test:e2e`
+- `test` 被用于 `vue-cli-service test:unit`
+
+每种模式都会将 `NODE_ENV` 环境变量的值设置为模式的名称，例如在 `development` 模式下 `NODE_ENV` 的值会被设置为 `"development"`。
+
+### [环境变量](https://cli.vuejs.org/zh/guide/mode-and-env.html#在客户端侧代码中使用环境变量)
+
+在 Vue CLI 中可以使用项目根目录下的 `.env` 和 `.env.[mode]` 文件定义不同模式下的环境变量，这些环境变量会被载入并对 `vue-cli-service` 所有命令、插件、依赖可用。
+
+需要注意的是，只有 `VUE_APP_` 开头的变量会被 `webpack.DefinePlugin` 静态嵌入到 Vue 客户端侧的包中。并且，Vue CLI 定义了两个全局的变量：`NODE_ENV` 和 `BASE_URL`。
