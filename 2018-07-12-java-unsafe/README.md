@@ -13,7 +13,7 @@
 - **long 类型** `getLong(Object o, long offset)`、`putLong(Object o, long offset, long x)`
 - **其它类型 ......**
 
-### 根据偏移量，保证可见性和有序性（即 `vlotaile` 语义）地获取/设置对象字段
+### 根据偏移量，保证可见性和有序性（即 `volatile` 语义）地获取/设置对象字段
 
 - **Object 类型** `getObjectVolatile(Object o, long offset)`、`putObjectVolatile(Object o, long offset, Object x)`
 - **int 类型** `getIntVolatile(Object o, long offset)`、`putIntVolatile(Object o, long offset, int x)`
@@ -72,7 +72,7 @@
 
 - **获取系统指针占用的字节大小** `addressSize()`
 - **获取内存页占用的字节大小** `pageSize()`
-- **获取系统负载情况** `getLoadAverage(double[] loadavg, int nelems)`
+- **获取系统负载情况（相当于 Linux 中的 uptime）** `getLoadAverage(double[] loadavg, int nelems)`
 
 ### CAS 相关操作
 
@@ -97,3 +97,4 @@
 
 - [OpenJDK Unsafe 源码](http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/share/classes/sun/misc/Unsafe.java)
 - [Java 魔法类：Unsafe 应用解析](https://tech.meituan.com/2019/02/14/talk-about-java-magic-class-unsafe.html)
+- [man uptime](https://man.linuxde.net/uptime)
