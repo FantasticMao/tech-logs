@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue - 深入响应式原理</title>
+    <style>
+      #app {
+        margin-top: 100px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <input value="Hello" />
+      <h1>Hello</h1>
+    </div>
+    <script>
+      var name = "MaoMao";
+      const user = Object.defineProperty({}, "name", {
+        get: function() {
+          return name;
+        },
+        set: function(newVal) {
+          document.getElementsByTagName("h1")[0].innerHTML = newVal;
+          name = newVal;
+        }
+      });
+
+      document
+        .getElementsByTagName("input")[0]
+        .addEventListener("input", function() {
+          user.name = this.value;
+        });
+
+      const obj = {
+        get name() {
+          return "FantasticMao";
+        }
+      };
+      window.console.log(obj.name); // FantasticMao
+    </script>
+  </body>
+</html>

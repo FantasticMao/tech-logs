@@ -77,9 +77,24 @@ export default {
 
 在 Vue 中可以使用 `$root` 属性访问根实例，使用 `$parent` 从子组件访问父组件，配合使用 `ref` 属性和 `$refs` 属性从父组件访问子组件。更多访问元素和组件的内容请见 [官方文档](https://vuejs.bootcss.com/v2/guide/components-edge-cases.html#访问元素-amp-组件)。
 
-### MVVM 实现原理
+### 响应式实现原理
 
-// TODO
+ECMAScript5 的 JavaScript 对象可以使用 getter/setter 方法替代属性的定义，示例代码如下：
+
+```javascript
+const obj = {
+  get name() {
+    return "FantasticMao";
+  }
+};
+window.console.log(obj.name); // FantasticMao
+```
+
+《JavaScript 权威指南》第六章中将 JavaScript 普通对象的属性称为 **数据属性**，将由 getter/setter 定义的属性成为 **存储器属性**。**数据属性** 拥有一个名字和四个特性：值（value）、可写（writable）、可枚举（enumerable）、可配置（configurable），**存储器属性** 缺少了值和可写的特性，但增加了读取（get）、写入（set）的特性。
+
+ECMAScript5 中定义了一个属性描述符（property descriptor）对象，用于实现上述特性的查询和设置操作。可以通过调用 [`Object.getOwnPropertyDescriptor()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor) 和 [`Object.getOwnPropertyDescriptors()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptors) 获取某个对象的属性描述符，通过调用 [`Object.defineProperty()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) 和 [`Object.defineProperties()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties) 设置某个对象的属性和属性描述符。
+
+Vue 在内部通过调用 `Object.defineProperty()` 把 `data` 定义的 **数据属性** 转换成 **存储器属性**，以此来追踪依赖，实现在属性被访问和修改时通知变化。简单版本的实现代码请见 [mvvm.html](./mvvm.html)，更多关于响应式原理的内容请见 [官方文档](https://vuejs.bootcss.com/v2/guide/reactivity.html)。
 
 ## [Vue Devtools](https://github.com/vuejs/vue-devtools)
 
