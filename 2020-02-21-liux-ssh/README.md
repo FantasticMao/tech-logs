@@ -1,57 +1,41 @@
 # SSH
 
-SSH (Secure Shell) 在 [官网](https://www.ssh.com/ssh/command) 中特意标注了除 `ssh` 以外的其它命令，如下图所示。一个经常使用 Linux 的开发者必须熟练掌握 SSH，因此学习以下这些 SSH 套件中的常用命令是非常有必要的。这篇日志记录个人在系统性地学习 SSH 相关命令过程中的一些零碎笔记。
-
-![image](1.png)
+这篇日志记录个人在系统性地学习 OpenSSH 相关工具过程中的一些零碎笔记，SSH 协议不在本篇日志的记录范围之内。
 
 ## [ssh](https://www.ssh.com/ssh)
 
-`man ssh` 摘要：
+大部分 Unix / Linux 系统都内置了 `ssh` 命令，用于在本机启动 SSH 客户端程序，与远程主机建立安全的连接。`ssh` 命令可以用于登录远程主机，在两台主机之间传输文件，以及在远程主机上执行命令。
+
+使用 `ssh` 登录远程主机非常简单，常用形式如下：
 
 ```
-NAME
-    ssh -- OpenSSH SSH client (remote login program)
-
-DESCRIPTION
-    ssh (SSH client) is a program for logging into a remote machine and for executing commands on a remote machine.  It is intended to provide secure encrypted communications between two untrusted hosts over an insecure network.
+ssh [-p port] [user@]hostname
 ```
 
-`ssh` 是 OpenSSH 中的客户端连接工具，可用于登录远程主机和在远程主机上执行命令。`ssh` 命令通过网络连接，在两台主机之间提供了安全和加密的交互方式。
+使用 `ssh` 第一次连接到某台远程主机时，用户需要遵循提示，将这台远程主机的 host key 保存到本机的 `~/.ssh/known_hosts` 文件中。
 
-`ssh` 登录远程主机的简单和常用方式为： `ssh [-p port] [user@]hostname`。
+使用 `ssh` 与远程主机建立连之后，用户需要输入密码进行身份认证。在身份认证成功之后，用户便会进入远程主机的 shell prompt（即等待用户输入 shell 命令的交互界面）。
 
-## [ssh configuration](https://www.ssh.com/ssh/config/)
+---
 
-`man ssh_config` 摘要：
+`ssh` 也经常被用于这样的场景：无需登录远程主机进行 shell 交互，而是直接执行远程主机的 shell 命令。在这种场景中，可以使用如下形式的 `ssh` 命令：
 
 ```
-NAME
-    ssh_config -- OpenSSH SSH client configuration files
-
-DESCRIPTION
-    ssh(1) obtains configuration data from the following sources in the following order:
-
-           1.   command-line options
-           2.   user's configuration file (~/.ssh/config)
-           3.   system-wide configuration file (/etc/ssh/ssh_config)
-
-    For each parameter, the first obtained value will be used.  The configuration files contain sections separated by Host specifications, and that section is only applied for hosts that match one of the patterns given in the specification.
+ssh [-p port] [user@]hostname [command]
 ```
 
-SSH 为客户端提供了一种从配置文件获取配置的方式，`ssh` 会按照以下顺序获取配置数据：
+---
 
-1. 命令行选项
-2. 用户级别配置文件（`~/.ssh/config`）
-3. 系统级别配置文件（`/etc/ssh/ssh_config`）
+`ssh` 默认会从用户级别的 `~/.ssh/config` 文件和系统级别的 `/etc/ssh/ssh_config` 文件读取 ssh 配置数据，也可以使用 `ssh` 的 `-F configfile` 选项显示指定配置文件的地址。
 
-SSH 配置文件的语法为：
+`ssh` 命令行中的配置选项优先级最高，其次是用户级别的配置文件，再其次是系统级别的配置文件。`ssh` 配置文件的语法如下：
 
-- 空格和 `#` 开头的行会被忽略
-- 每行以关键字开头，后面跟着参数
-- 配置选项可以使用空格或者等号分隔
+- 空格和以 `#` 开头的行会被忽略
+- 每行以关键字开头，其后是所需的参数列表
+- 配置选项之间可以使用空格或者等号分隔
 - 可以使用双引号（`"`）将参数括起来，用于指定包含空格的参数
 
-一个简单的 SSH 配置文件示例如下：
+一个简单的 `ssh` 配置文件如下：
 
 ```
 ~$ cat ~/.ssh/config
@@ -65,6 +49,7 @@ Host tencent
     HostName 55.66.77.88
     User app
     Port 22222
+~$
 ```
 
 ## [ssh-keygen](https://www.ssh.com/ssh/keygen)
