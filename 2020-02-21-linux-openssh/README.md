@@ -1,4 +1,4 @@
-# SSH
+# OpenSSH
 
 这篇日志记录个人在系统性地学习 OpenSSH 相关工具过程中的一些零碎笔记，SSH 协议不在本篇日志的记录范围之内。
 
@@ -73,9 +73,9 @@ ssh-copy-id -i ~/.ssh/id_rsa user@host
 
 ## [ssh-agent](https://www.ssh.com/ssh/agent)
 
-`ssh-agent` 是一个帮助程序，可以用于跟踪用户的身份密钥（私钥）和密码短语。`ssh-agent` 使用密钥即可直接登录远程主机，而无需用户再次输入密码短语。`ssh-agent` 通过这种形式实现了单点登录（single sign-on）。
+`ssh-agent` 是一个帮助程序，用于跟踪用户的身份密钥（私钥）和密码短语。`ssh-agent` 可以使用密钥直接登录远程主机，而无需用户再次输入密码短语。`ssh-agent` 通过这种形式实现了单点登录（single sign-on）。
 
-`ssh-agent` 被用于 SSH 公共密钥认证技术，它需要使用 SSH 密钥。用户可以使用 `ssh-kengen` 命令创建 SSH 密钥，然后使用 `ssh-copy-id` 命令在远程主机上安装 SSH 密钥。
+`ssh-agent` 被用于 SSH 公共密钥认证，它需要使用 SSH 密钥。用户可以使用 `ssh-kengen` 命令创建 SSH 密钥，然后使用 `ssh-copy-id` 命令在远程主机上安装 SSH 密钥。
 
 在大部分 Linux 系统中，`ssh-agent` 会被自动配置，并且会在用户登录时自动运行，用户不需要其它操作既可直接使用 `ssh-agent`。如果 `ssh-agent` 没有被配置为在登录时运行，它也可以通过以下命令手动运行：
 
@@ -93,10 +93,30 @@ eval `ssh-agent`
 
 ## [scp](https://www.ssh.com/ssh/scp)
 
-## [sftp](https://www.ssh.com/ssh/sftp)
+`scp` 是一个使用 SSH 协议在多台主机之间复制文件的程序。大部分 Unix / Linux 系统都内置了 `scp` 命令。
 
-略
+使用 `scp` 复制文件至远程主机的命令如下：
 
-## [sshd](https://www.ssh.com/ssh/sshd)
+```
+scp file ... [user@]host:[path]
+```
 
-略
+使用 `scp` 从远程主机复制文件的命令如下：
+
+```
+scp [user@]host:[file] ... path
+```
+
+使用 `scp` 复制整个目录时，需要添加 `-r` 选项：
+
+```
+scp -r [user@]host:[path/directory] path
+```
+
+## sftp
+
+略，更多信息请查看 [官方文档](<(https://www.ssh.com/ssh/sftp)>)。
+
+## sshd
+
+略，更多信息请查看 [官方文档](<(https://www.ssh.com/ssh/sshd)>)。
