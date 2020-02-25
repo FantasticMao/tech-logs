@@ -2,7 +2,7 @@
 
 这篇日志记录个人在系统性地学习 OpenSSH 相关工具过程中的一些零碎笔记，SSH 协议不在本篇日志的记录范围之内。
 
-## [ssh](https://www.ssh.com/ssh)
+## [ssh](https://www.ssh.com/ssh/command)
 
 大部分 Unix / Linux 系统都内置了 `ssh` 命令，用于在本机启动 SSH 客户端程序，建立与远程主机安全的连接。`ssh` 命令可以用于登录远程主机，在两台主机之间传输文件，以及在远程主机上执行命令。
 
@@ -33,21 +33,23 @@ ssh [-p port] [user@]host [command]
 - 配置选项之间可以使用空格或者等号分隔
 - 可以使用双引号（`"`）将参数括起来，用于指定包含空格的参数
 
-一个简单的 `ssh` 配置文件如下：
+`ssh` 配置文件中包含多台主机的配置以 **Host** 或者 **Match** 关键字分隔，并且每个部分的配置都会只应用于匹配模式成功的主机。`ssh` 配置文件中的关键字不区分大小写，但参数值区分大小写。一个简单的 `ssh` 配置文件如下：
 
 ```
 ~$ cat ~/.ssh/config
 # 阿里云
 Host aliyun
-    HostName 11.22.33.44
-    User root
-    Port 22
+HostName 11.22.33.44
+User root
+
 # 腾讯云
 Host tencent
-    HostName 55.66.77.88
-    User app
-    Port 22222
+HostName 55.66.77.88
+User app
+Port 22222
 ```
+
+更多关于 `ssh` 配置文件的信息请查看 [man ssh_config](https://man.openbsd.org/OpenBSD-current/man5/ssh_config.5)。
 
 ## [ssh-keygen](https://www.ssh.com/ssh/keygen)
 
@@ -115,8 +117,8 @@ scp -r [user@]host:[path/directory] path
 
 ## sftp
 
-略，更多信息请查看 [官方文档](<(https://www.ssh.com/ssh/sftp)>)。
+略，更多信息请查看 [官方文档](https://www.ssh.com/ssh/sftp)。
 
 ## sshd
 
-略，更多信息请查看 [官方文档](<(https://www.ssh.com/ssh/sshd)>)。
+略，更多信息请查看 [官方文档](https://www.ssh.com/ssh/sshd)。
