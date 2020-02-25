@@ -51,7 +51,7 @@ Host tencent
 
 ## [ssh-keygen](https://www.ssh.com/ssh/keygen)
 
-SSH 协议使用公共密钥加密（public key cryptography）技术对主机和用户进行身份认证，其中的认证密钥被叫做 SSH 密钥，需要使用 `ssh-keygen` 命令创建。SSH 密钥可以用于自动登录、单次登录（只需登录一次）和主机认证。
+SSH 协议使用公共密钥加密（public key cryptography）技术对主机和用户进行身份认证，其中的认证密钥被叫做 SSH 密钥（包含公钥和私钥），需要使用 `ssh-keygen` 命令创建。SSH 密钥可以用于自动登录、单点登录和主机认证。
 
 创建 SSH 密钥最简单的方式是不带任何参数地直接运行 `ssh-keygen` 命令，在这种情况下，`ssh-keygen` 命令会提示用户 SSH 密钥文件的存储位置，如下图所示：
 
@@ -63,7 +63,7 @@ SSH 支持多种用于认证密钥的公共密钥算法，包括 `rsa`、`dsa`�
 
 ## [ssh-copy-id](https://www.ssh.com/ssh/copy-id)
 
-在 SSH 中为了使用公共密钥认证（public key authentication），公钥必须被拷贝至服务端，并需要被添加到 `./ssh/authorized_keys` 文件中。可以使用 `ssh-copy-id` 命令很方便地完成此操作，如下所示：
+在 SSH 中为了使用公共密钥认证（public key authentication）技术来对用户进行身份认证，公钥必须被拷贝至服务端，并需要被添加到 `./ssh/authorized_keys` 文件中。可以使用 `ssh-copy-id` 命令很方便地完成此操作，如下所示：
 
 ```
 ssh-copy-id -i ~/.ssh/id_rsa user@host
@@ -73,11 +73,27 @@ ssh-copy-id -i ~/.ssh/id_rsa user@host
 
 ## [ssh-agent](https://www.ssh.com/ssh/agent)
 
+`ssh-agent` 是一个帮助程序，可以用于跟踪用户的身份密钥（私钥）和密码短语。`ssh-agent` 使用密钥即可直接登录远程主机，而无需用户再次输入密码短语。`ssh-agent` 通过这种形式实现了单点登录（single sign-on）。
+
+`ssh-agent` 被用于 SSH 公共密钥认证技术，它需要使用 SSH 密钥。用户可以使用 `ssh-kengen` 命令创建 SSH 密钥，然后使用 `ssh-copy-id` 命令在远程主机上安装 SSH 密钥。
+
+在大部分 Linux 系统中，`ssh-agent` 会被自动配置，并且会在用户登录时自动运行，用户不需要其它操作既可直接使用 `ssh-agent`。如果 `ssh-agent` 没有被配置为在登录时运行，它也可以通过以下命令手动运行：
+
+```
+eval `ssh-agent`
+```
+
 ## [ssh-add](https://www.ssh.com/ssh/add)
+
+`ssh-agent` 默认会使用 `~/.ssh/` 目录下的 SSH 密钥，但用户可以使用 `ssh-add` 命令主动添加密钥至 `ssh-agent` 中。
+
+运行 `ssh-add` 命令时如果不带任何参数的话，`ssh-add` 会默认添加 `~/.ssh/id_rsa`、`~/.ssh/id_dsa`、`~/.ssh/id_ecdsa`、`~/.ssh/id_ed25519`、`~/.ssh/identity` 文件，也可以通过参数指定私钥的文件。
+
+`ssh-addd -l` 命令可以列出当前 `ssh-agent` 允许访问的私钥。
 
 ## [scp](https://www.ssh.com/ssh/scp)
 
-## sftp
+## [sftp](https://www.ssh.com/ssh/sftp)
 
 略
 
